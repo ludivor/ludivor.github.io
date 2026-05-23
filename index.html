@@ -3,38 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modo Libre - Repositorios</title>
+    <title>Directorio de Repositorios</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: 'Courier New', Courier, monospace; }
-        .glitch-link:hover { color: #00ff00; text-decoration: underline; }
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        body { 
+            font-family: 'JetBrains Mono', monospace; 
+            background-color: #000000;
+        }
+        .repo-link:hover {
+            background-color: #facc15; /* Amarillo */
+            color: #000000;
+        }
+        .custom-border {
+            border-bottom: 1px solid #222;
+        }
     </style>
 </head>
-<body class="bg-black text-gray-300 min-h-screen p-8 md:p-24">
+<body class="text-zinc-300 min-h-screen p-6 md:p-20">
 
-    <div class="max-w-2xl mx-auto">
-        <header class="mb-12 border-b border-gray-800 pb-6">
-            <h1 class="text-2xl font-bold text-white mb-2"># MODO LIBRE ACTIVO</h1>
-            <p class="text-sm italic opacity-70">La elegancia de compartir.</p>
+    <div class="max-w-3xl mx-auto">
+        <header class="mb-16">
+            <h1 class="text-yellow-400 text-3xl font-bold tracking-tighter mb-2">
+                # MODO LIBRE ACTIVO
+            </h1>
+            <p class="text-zinc-500 text-sm">
+                [ La elegancia de compartir ]
+            </p>
         </header>
 
         <main>
-            <div id="repos-list" class="space-y-4">
-                <p class="animate-pulse">Consultando terminal...</p>
+            <div id="repos-list" class="flex flex-col">
+                <p class="text-yellow-400 animate-pulse">Cargando base de datos...</p>
             </div>
         </main>
 
-        <footer class="mt-20 pt-8 border-t border-gray-800 text-xs opacity-50">
-            <p>© Licencia Copyleft - <a href="./LICENSE" class="underline">Ver términos</a></p>
+        <footer class="mt-24 pt-8 custom-border text-[10px] text-zinc-600 uppercase tracking-[0.2em]">
+            <p>© Licencia Copyleft — <a href="./LICENSE" class="hover:text-white underline">Términos legales</a></p>
+            <p class="mt-2">GitHub Pages // Automático</p>
         </footer>
     </div>
 
     <script>
-        const USERNAME = 'ludivor'; // <--- TU NOMBRE DE GITHUB
+        const USERNAME = 'TU_USUARIO_AQUI'; // <--- Pon tu usuario aquí
 
         async function fetchRepos() {
             try {
-                const response = await fetch(`https://api.github.com/users/${USERNAME}/repos?sort=updated&per_page=20`);
+                const response = await fetch(`https://api.github.com/users/${USERNAME}/repos?sort=updated&per_page=30`);
                 const repos = await response.json();
                 
                 const list = document.getElementById('repos-list');
@@ -43,21 +59,25 @@
                 repos.forEach(repo => {
                     if (!repo.fork) {
                         const item = `
-                            <div class="group">
-                                <span class="text-gray-600 mr-2">></span>
-                                <a href="${repo.html_url}" target="_blank" class="glitch-link transition-colors uppercase tracking-widest text-sm">
-                                    ${repo.name}
-                                </a>
-                                <span class="block text-xs text-gray-600 ml-5 mt-1">
-                                    [${repo.language || 'DATA'}] - ${repo.description || 'SIN DESCRIPCIÓN'}
-                                </span>
+                            <div class="custom-border py-4 group">
+                                <div class="flex items-baseline justify-between">
+                                    <a href="${repo.html_url}" target="_blank" class="repo-link text-lg font-bold text-white px-1 transition-all">
+                                        ${repo.name.toUpperCase()}
+                                    </a>
+                                    <span class="text-[10px] text-zinc-600 font-bold uppercase">
+                                        ${repo.language || 'Code'}
+                                    </span>
+                                </div>
+                                <p class="text-sm text-zinc-500 mt-1 max-w-xl italic">
+                                    ${repo.description || 'Sin descripción en el repositorio.'}
+                                </p>
                             </div>
                         `;
                         list.innerHTML += item;
                     }
                 });
             } catch (error) {
-                list.innerHTML = '<p class="text-red-500">Error de conexión con el núcleo.</p>';
+                list.innerHTML = '<p class="text-red-600 font-bold">ERROR: FALLO EN LA CONEXIÓN CON GITHUB</p>';
             }
         }
         fetchRepos();
