@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Repositorios</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans">
+
+    <div class="container mx-auto px-4 py-12">
+        <header class="text-center mb-16">
+            <h1 class="text-4xl font-bold mb-2">Mis Proyectos en GitHub</h1>
+            <p class="text-gray-400">Actualizado automáticamente vía API</p>
+        </header>
+
+        <div id="repos-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <p class="text-center col-span-full">Cargando proyectos...</p>
+        </div>
+    </div>
+
+    <script>
+        const USERNAME = 'ludivor'; // <--- CAMBIA ESTO
+
+        async function fetchRepos() {
+            try {
+                // Obtenemos los repos ordenados por los más recientes
+                const response = await fetch(`https://api.github.com/users/${USERNAME}/repos?sort=updated&per_page=12`);
+                const repos = await response.json();
+                
+                const container = document.getElementById('repos-container');
+                container.innerHTML = ''; // Limpiar loader
+
+                repos.forEach(repo => {
+                    if (!repo.fork) { // Solo mostrar proyectos propios, no forks
+                        const card = `
+                            <a href="${repo.html_url}" target="_blank" class="block p-6 bg-gray-800 rounded-xl border border-gray-700 hover:border-blue-500 transition-all transform hover:-translate-y-1 shadow-lg">
+                                <h3 class="text-xl font-semibold text-blue-400 mb-2 truncate">${repo.name}</h3>
+                                <p class="text-gray-400 text-sm mb-4 h-12 overflow-hidden">${repo.description || 'Sin descripción disponible.'}</p>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-mono text-gray-500">${repo.language || 'HTML'}</span>
+                                    <span class="text-xs text-gray-500">⭐ ${repo.stargazers_count}</span>
+                                </div>
+                            </a>
+                        `;
+                        container.innerHTML += card;
+                    }
+                });
+            } catch (error) {
+                console.error("Error cargando los repos:", error);
+            }
+        }
+
+        fetchRepos();
+    </script>
+</body>
+</html>
