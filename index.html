@@ -1,110 +1,466 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modo Libre Activo</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Importamos una fuente Mono más pesada para los títulos */
-        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
-        
-        body { 
-            font-family: 'Space Mono', monospace; 
-            background-color: #000000;
-            color: #ffffff;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi GitHub</title>
+  <meta name="description" content="Página personal de GitHub con repositorios cargados desde la API." />
+  <style>
+    :root {
+      --bg: #0a0f14;
+      --bg-soft: #101820;
+      --panel: rgba(17, 24, 39, 0.72);
+      --panel-border: rgba(0, 255, 170, 0.14);
+      --text: #e6edf3;
+      --muted: #8b9bab;
+      --accent: #00ff9c;
+      --accent-soft: #00c77b;
+      --danger: #ff6b6b;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      --radius: 18px;
+      --max: 1100px;
+    }
 
-        .yellow-text { color: #ffff00; } 
-        
-        .repo-item {
-            border-bottom: 1px solid #1a1a1a;
-            padding: 1.5rem 0;
-        }
+    * {
+      box-sizing: border-box;
+    }
 
-        .repo-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            text-decoration: none;
-            display: inline-block;
-        }
+    html {
+      scroll-behavior: smooth;
+    }
 
-        .repo-title:hover {
-            color: #ffff00;
-        }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(0, 255, 156, 0.08), transparent 26%),
+        radial-gradient(circle at top right, rgba(0, 255, 156, 0.05), transparent 22%),
+        linear-gradient(180deg, #071018 0%, #0a0f14 100%);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
 
-        /* El punto azul/celeste que suele aparecer en esos estilos */
-        .dot { color: #00ffff; }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(0, 255, 156, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 156, 0.035) 1px, transparent 1px);
+      background-size: 28px 28px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,.32), transparent 90%);
+    }
 
-        /* Estilo de la licencia al pie */
-        .copyleft {
-            font-size: 0.85rem;
-            margin-top: 4rem;
-            border-top: 1px solid #333;
-            padding-top: 2rem;
-        }
-    </style>
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .wrap {
+      width: min(var(--max), calc(100% - 2rem));
+      margin: 0 auto;
+    }
+
+    .hero {
+      padding: 96px 0 44px;
+    }
+
+    .hero-card {
+      background: linear-gradient(180deg, rgba(16, 24, 32, 0.84), rgba(10, 15, 20, 0.78));
+      border: 1px solid var(--panel-border);
+      border-radius: calc(var(--radius) + 6px);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      padding: 34px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -30px -30px auto;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,255,156,0.15), transparent 68%);
+      filter: blur(8px);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.84rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      margin-bottom: 14px;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 34px;
+      height: 1px;
+      background: var(--accent);
+      opacity: 0.75;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 6vw, 4rem);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+    }
+
+    .subtitle {
+      margin: 0;
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 1.02rem;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin: 26px 0 10px;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 16px;
+      border-radius: 999px;
+      background: rgba(0, 255, 156, 0.08);
+      color: var(--accent);
+      border: 1px solid rgba(0, 255, 156, 0.16);
+      transition: 0.25s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      background: rgba(0, 255, 156, 0.14);
+      border-color: rgba(0, 255, 156, 0.34);
+      box-shadow: 0 10px 24px rgba(0, 255, 156, 0.08);
+    }
+
+    main {
+      padding: 10px 0 60px;
+    }
+
+    .section-title {
+      margin: 0 0 18px;
+      font-size: 1rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .repo-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 210px;
+      padding: 20px;
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(16, 24, 32, 0.82), rgba(11, 17, 22, 0.9));
+      border: 1px solid rgba(255,255,255,0.05);
+      box-shadow: var(--shadow);
+      transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .repo-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(130deg, rgba(0,255,156,0.08), transparent 40%);
+      opacity: 0;
+      transition: opacity 0.22s ease;
+    }
+
+    .repo-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(0,255,156,0.25);
+      box-shadow: 0 16px 34px rgba(0,0,0,0.42);
+    }
+
+    .repo-card:hover::before {
+      opacity: 1;
+    }
+
+    .repo-top,
+    .repo-bottom {
+      position: relative;
+      z-index: 1;
+    }
+
+    .repo-name {
+      margin: 0 0 10px;
+      font-size: 1.15rem;
+      color: #f4faff;
+    }
+
+    .repo-desc {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .repo-bottom {
+      margin-top: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.84rem;
+      color: #cfe8de;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      padding: 7px 10px;
+      border-radius: 999px;
+    }
+
+    .tag-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 12px rgba(0,255,156,0.5);
+    }
+
+    .updated {
+      font-size: 0.83rem;
+      color: var(--muted);
+    }
+
+    .state,
+    .error {
+      padding: 16px 18px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      color: var(--muted);
+    }
+
+    .error {
+      color: #ffd5d5;
+      border-color: rgba(255, 107, 107, 0.18);
+      background: rgba(255, 107, 107, 0.08);
+    }
+
+    footer {
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 26px 0 40px;
+      color: var(--muted);
+    }
+
+    .footer-inner {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .footer-left,
+    .footer-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .footer-link {
+      color: var(--accent);
+      transition: opacity 0.2s ease;
+    }
+
+    .footer-link:hover {
+      opacity: 0.8;
+    }
+
+    .copyleft {
+      display: inline-block;
+      transform: scaleX(-1);
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .terminal-line {
+      margin-top: 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.9rem;
+      color: #8fdcb9;
+      opacity: 0.9;
+    }
+
+    .terminal-line::before {
+      content: "> ";
+      color: var(--accent);
+    }
+
+    @media (max-width: 640px) {
+      .hero {
+        padding-top: 72px;
+      }
+
+      .hero-card {
+        padding: 24px 18px;
+      }
+
+      .toolbar,
+      .footer-inner {
+        align-items: flex-start;
+      }
+    }
+  </style>
 </head>
-<body class="p-8 md:p-20 max-w-4xl">
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <div class="hero-card">
+        <div class="eyebrow">GitHub Pages</div>
+        <h1 id="page-title">ludivor</h1>
+        <p class="subtitle">
+          Repositorios cargados en tiempo real desde GitHub con un diseño oscuro, limpio y un ligero toque hacker.
+        </p>
+        <div class="toolbar">
+          <div class="meta" id="repo-count">Cargando repositorios...</div>
+          <a class="btn" id="profile-link" href="https://github.com/ludivor" target="_blank" rel="noopener noreferrer">
+            Ver perfil
+          </a>
+        </div>
+        <div class="terminal-line">fetching repositories...</div>
+      </div>
+    </div>
+  </header>
 
-    <header class="mb-16">
-        <h1 class="text-3xl font-bold mb-4 uppercase tracking-tighter italic">
-            # MODO LIBRE ACTIVO
-        </h1>
-        <nav class="text-lg">
-            <span class="yellow-text">[</span>
-            <a href="./neipfs.m3u" class="hover:underline">La elegancia de compartir.</a>
-            <span class="yellow-text">]</span>
-        </nav>
-    </header>
+  <main class="wrap">
+    <h2 class="section-title">Repositorios</h2>
+    <div id="repos" class="grid" aria-live="polite">
+      <div class="state">Cargando datos desde la API de GitHub...</div>
+    </div>
+  </main>
 
-    <main id="repos-container">
-        <p class="animate-pulse yellow-text">Estableciendo conexión con el servidor...</p>
-    </main>
+  <footer>
+    <div class="wrap footer-inner">
+      <div class="footer-left">
+        <span class="copyleft">©</span>
+        <span>2026 · Ludivor</span>
+      </div>
 
-    <footer class="copyleft">
-        <p>© Licencia <span class="yellow-text font-bold">Copyleft</span></p>
-    </footer>
+      <div class="footer-right">
+        <span>Licencia:</span>
+        <a class="footer-link" href="./LICENSE" target="_blank" rel="noopener noreferrer">Ver archivo LICENSE</a>
+      </div>
+    </div>
+  </footer>
 
-    <script>
-        const GITHUB_USER = 'ludivor'; // <--- Pon tu nombre de usuario aquí
+  <script>
+    const username = "ludivor";
+    const reposContainer = document.getElementById("repos");
+    const repoCount = document.getElementById("repo-count");
+    const pageTitle = document.getElementById("page-title");
+    const profileLink = document.getElementById("profile-link");
 
-        async function loadRepos() {
-            try {
-                const res = await fetch(`https://api.github.com/users/${GITHUB_USER}/repos?sort=updated&per_page=50`);
-                const repos = await res.json();
-                const container = document.getElementById('repos-container');
-                container.innerHTML = '';
+    pageTitle.textContent = username;
+    profileLink.href = `https://github.com/${username}`;
 
-                repos.forEach(repo => {
-                    if (!repo.fork) {
-                        const div = document.createElement('div');
-                        div.className = 'repo-item';
-                        div.innerHTML = `
-                            <div class="mb-1">
-                                <span class="yellow-text mr-2">./</span>
-                                <a href="${repo.html_url}" target="_blank" class="repo-title">
-                                    ${repo.name}
-                                </a>
-                            </div>
-                            <p class="text-zinc-500 text-sm italic ml-6">
-                                ${repo.description || 'Sin descripción disponible'}
-                            </p>
-                            <div class="ml-6 mt-2 text-[10px] uppercase tracking-widest text-zinc-700">
-                                Language: <span class="text-zinc-400">${repo.language || 'Binary'}</span> 
-                                <span class="mx-2">|</span> 
-                                Stars: <span class="text-zinc-400">${repo.stargazers_count}</span>
-                            </div>
-                        `;
-                        container.appendChild(div);
-                    }
-                });
-            } catch (e) {
-                document.getElementById('repos-container').innerHTML = '<span class="text-red-600">ERROR_LOG: FALLO_DE_SISTEMA</span>';
-            }
+    const endpoint = `https://api.github.com/users/${username}/repos?sort=updated&per_page=100`;
+
+    function formatDate(dateString) {
+      return new Intl.DateTimeFormat("es-ES", {
+        year: "numeric",
+        month: "short",
+        day: "numeric"
+      }).format(new Date(dateString));
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text ?? "";
+      return div.innerHTML;
+    }
+
+    async function loadRepos() {
+      try {
+        const response = await fetch(endpoint, {
+          headers: {
+            "Accept": "application/vnd.github+json"
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
         }
 
-        loadRepos();
-    </script>
+        const repos = await response.json();
+
+        const filtered = repos
+          .filter(repo => !repo.fork)
+          .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+
+        repoCount.textContent = `${filtered.length} repositorios públicos`;
+        document.querySelector(".terminal-line").textContent = `loaded ${filtered.length} repositories`;
+
+        if (!filtered.length) {
+          reposContainer.innerHTML = `<div class="state">No se encontraron repositorios públicos.</div>`;
+          return;
+        }
+
+        reposContainer.innerHTML = filtered.map(repo => `
+          <a class="repo-card" href="${repo.html_url}" target="_blank" rel="noopener noreferrer" aria-label="Abrir repositorio ${escapeHtml(repo.name)}">
+            <div class="repo-top">
+              <h3 class="repo-name">${escapeHtml(repo.name)}</h3>
+              <p class="repo-desc">${escapeHtml(repo.description || "Sin descripción disponible.")}</p>
+            </div>
+            <div class="repo-bottom">
+              <span class="tag">
+                <span class="tag-dot"></span>
+                ${escapeHtml(repo.language || "Sin lenguaje")}
+              </span>
+              <span class="updated">Actualizado: ${formatDate(repo.updated_at)}</span>
+            </div>
+          </a>
+        `).join("");
+      } catch (error) {
+        repoCount.textContent = "Error al cargar";
+        document.querySelector(".terminal-line").textContent = "request failed";
+        reposContainer.innerHTML = `
+          <div class="error">
+            No se pudieron cargar los repositorios. Revisa el nombre de usuario o inténtalo más tarde.
+          </div>
+        `;
+      }
+    }
+
+    loadRepos();
+  </script>
 </body>
 </html>
